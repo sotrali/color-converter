@@ -185,7 +185,7 @@ def validateArguments(args) :
             return False
 
     # Second, check that there is a color code to convert
-    if len(color) == 0 :
+    if len(args.color) == 0 :
         print('ERROR: Must enter both an input flag and color code (did you forget to wrap color code in quotes?)\nFor more info, use the \'-h\' or \'--help\' flag.')
         return False
     
