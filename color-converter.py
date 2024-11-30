@@ -11,11 +11,10 @@ def main():
     parser.add_argument('color', nargs='*', help='accepts a color in Hex, RGB, CYMK, or HSL and performs format conversions')
     args = parser.parse_args()
 
-    print('TYPES: ', TYPES)
-    print(args)
+    print(args, '\n')
 
     color = args.color 
-
+    
     if len(color) == 0 :
         print('ERROR: Must enter color code')
         return
@@ -47,7 +46,6 @@ def main():
 
 # Takes in valid RGB code and converts it to the other formats
 def convertFromHex(hexCode) :
-    print('-> Hex received: ', hexCode, ' ', type(hexCode))
     convertToRGB('hex', hexCode)
     # convertToCMYK('hex', code)
     # convertToHSL('hex', code)
@@ -69,15 +67,25 @@ def convertToHex(codeFormat, code) :
 
 # Takes in valid RGB code and converts it to the other formats
 def convertFromRGB(code) :
-    print('-> RGB received: ', code, ' ', type(code[0]), type(code[1]), type(code[2]))
     convertToHex('rgb', code)
     # convertToCMYK('rgb', code)
     # convertToHSL('rgb', code)
 
 def convertToRGB(codeFormat, code) :
-    if codeFormat == 'hex' :
-        print('bsdfljbsdfb')
+    rgbValue = '' 
 
+    if codeFormat == 'hex' :
+        
+        tempSum = 0
+        i = 0
+        while i < 6 :
+            tempSum += int(code[i], 16) * 16
+            tempSum += int(code[i+1], 16)
+            rgbValue += str(tempSum) + ' '
+            i = i + 2
+            tempSum = 0
+    
+    print('RGB: ', rgbValue)
 ##
 # INPUT VALIDATION SECTION
 ##
@@ -125,6 +133,7 @@ def hex(number) :
     if number < 10 :
         return str(number)
     return HEX_LETTERS[number % 10]
+
 
 
 if __name__ == '__main__' :
