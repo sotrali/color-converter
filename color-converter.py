@@ -60,8 +60,9 @@ def main():
             color = color[0].lower().strip('cmyk(').strip(')').replace('%', '').replace(' ', '').split(',')
         if not validateCMYK(color) :
             return
-
+        
         print('convert cmyk: ', color)
+        convertFromCMYK(color)
 ##
 # HEX CONVERSION SECTION
 ##
@@ -69,19 +70,23 @@ def main():
 # Takes in valid RGB code and converts it to the other formats
 def convertFromHex(hexCode) :
     print('convert hex: ', hexCode)
-    convertToRGB('hex', hexCode)
-    # convertToCMYK('hex', code)
+    
+    rgbValues = hexToRGB(hexCode)
+    print("RGB: ", rgbValues)
+
+    cmykValues = rgbToCMYK(rgbValues)
+    print("CMYK: ", cmykValues)
+    
     # convertToHSL('hex', code)
 
-def convertToHex(codeFormat, code) :
-    hexValue = '#'
+def rgbToHex(rgbValues) :
+    hexValue = ''
     
-    if codeFormat == 'rgb' :
-        for rgbValue in code :
-            hexValue += hex(int(rgbValue / 16)) 
-            hexValue += hex(int(rgbValue % 16))
+    for rgbValue in rgbValues :
+        hexValue += hex(int(rgbValue / 16)) 
+        hexValue += hex(int(rgbValue % 16))
     
-    print('HEX: ', hexValue)
+    return hexValue
 
 
 ##
@@ -89,30 +94,59 @@ def convertToHex(codeFormat, code) :
 ##
 
 # Takes in valid RGB code and converts it to the other formats
-def convertFromRGB(code) :
-    print('convert RGB: ', code)
-    convertToHex('rgb', code)
-    # convertToCMYK('rgb', code)
-    # convertToHSL('rgb', code)
-
-def convertToRGB(codeFormat, code) :
-    rgbValue = '' 
-
-    if codeFormat == 'hex' :
-        
-        tempSum = 0
-        i = 0
-        while i < 6 :
-            tempSum += int(code[i], 16) * 16
-            tempSum += int(code[i+1], 16)
-            rgbValue += str(tempSum) + ' '
-            i = i + 2
-            tempSum = 0
+def convertFromRGB(rgbValues) :
+    print('convert RGB: ', rgbValues)
     
-    print('RGB: ', rgbValue)
+    hexCode = rgbToHex(rgbValues)
+    print('Hex: ', hexCode)
+
+    cmykValues = rgbToCMYK(rgbValues)
+    print('CMYK: ', cmykValues)
+
+    # convertToHSL('rgb', rgbValues)
+
+def hexToRGB(hexCode) :
+    rgbValues = []
+
+    tempSum = 0
+    i = 0
+    while i < 6 :
+        tempSum += int(hexCode[i], 16) * 16
+        tempSum += int(hexCode[i+1], 16)
+        rgbValues.append(tempSum)
+        i = i + 2
+        tempSum = 0
+    
+    return rgbValues
+
+##
+# CMYK CONVERSION SECTION
+##
+
+def convertFromCMYK() :
+    print('huh')
+
+def rgbToCMYK(rgbValues) :
+    # Normalize RGB values
+    normalRed   = rgbValues[0] / 255
+    normalGreen = rgbValues[1] / 255
+    normalBlue  = rgbValues[2] / 255
+
+    # Establish black
+    black       = 1 - max(normalRed, normalGreen, normalBlue)
+    x           = 1 - black
+    
+    # Convert
+    cyan        = (1 - normalRed - black)   / x
+    magenta     = (1 - normalGreen - black) / x
+    yellow      = (1 - normalBlue - black)  / x
+    
+    return [cyan, magenta, yellow, black]
 
 
-
+def cmykToRGB(cmykValues) :
+    print('ddf')
+    
 ##
 # INPUT VALIDATION SECTION
 ##
