@@ -20,7 +20,7 @@ I originally (and still) just want this to be an exercise in Python that results
 
 That said, as I develop this, I see lots of room for improvement. Such as:
 - automatic format detection, no longer requiring a flag to indicate what format input is
-- accept more than one color code at a time
+- accept more than one color code at a time (-f for file input, -l for multiple (list of) strings
 - (to expand on ^) accept input from text file, where each line is it's own color code to convert
 - add flags to control which conversions are output (in the case you only want a single conversion) and how (do you want just the raw values or the whole string for with commas and stuff?)
 - combine the last two bullet points and boom: now the tool could take a whole list of colors in X format and spit out a file where every color is in Y format
@@ -33,6 +33,12 @@ maybe these ideas branch off into separate projects themselves, but:
 - accept images as output and some sort of color code that gets applied to said image (like a CLI program for applying color filters to images)
 
 ## Conversion Sources
-Hex<->RGB: https://en.wikipedia.org/wiki/Web_colors
+Hex<->RGB: 
+https://en.wikipedia.org/wiki/Web_colors
 
-RGB<->CMYK: https://thecolorsmeaning.com/rgb-to-cmyk/
+RGB<->CMYK: 
+https://www.101computing.net/cmyk-to-rgb-conversion-algorithm/
+https://thecolorsmeaning.com/rgb-to-cmyk/
+
+RGB<->CMY:
+http://colormine.org/convert/rgb-to-cmy
