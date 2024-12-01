@@ -22,8 +22,7 @@ def main():
 
 
     # debug print
-    print('args type: ', type(vars(args)))
-    print(args, '\n')
+    print(args)
 
 
     # INPUT SYNTAX VALIDATION
@@ -42,34 +41,23 @@ def main():
 
     # HANDLE RGB INPUT
     if args.rgb :
-        # cleanse any non-numerical stuff
-        if len(color) == 1 :
-            color = color[0].lower().strip('rgb(').strip(')').replace(' ', '').split(',')
-        if not validateRGB(color) :
-            return
-        
-        for i in range(len(color)) :
-            color[i] = int(color[i])
 
         convertFromRGB(color)
 
     # HANDLE CMYK INPUT
     if args.cmyk :
-        # cleanse any non-numerical stuff
-        if len(color) == 1 :
-            color = color[0].lower().strip('cmyk(').strip(')').replace('%', '').replace(' ', '').split(',')
-        if not validateCMYK(color) :
-            return
-        
-        print('convert cmyk: ', color)
         convertFromCMYK(color)
+
+
+
+
 ##
 # HEX CONVERSION SECTION
 ##
 
 # Takes in valid RGB code and converts it to the other formats
 def convertFromHex(hexCode) :
-    print('convert hex: ', hexCode)
+    print('convert hex: ', hexCode, '\n')
     
     rgbValues = hexToRGB(hexCode)
     print("RGB: ", rgbValues)
@@ -89,13 +77,25 @@ def rgbToHex(rgbValues) :
     return hexValue
 
 
-##
+
+ ##
 # RGB CONVERSION SECTION
 ##
 
 # Takes in valid RGB code and converts it to the other formats
-def convertFromRGB(rgbValues) :
-    print('convert RGB: ', rgbValues)
+def convertFromRGB(color) :
+    # cleanse any non-numerical stuff
+    if len(color) == 1 :
+        color = color[0].lower().strip('rgb(').strip(')').replace(' ', '').split(',')
+        
+    rgbValues = validateRGB(color)
+    if rgbValues is None :
+        return
+        
+    for i in range(len(rgbValues)) :
+        rgbValues[i] = int(rgbValues[i])
+
+    print('convert RGB: ', rgbValues, '\n')
     
     hexCode = rgbToHex(rgbValues)
     print('Hex: ', hexCode)
@@ -119,12 +119,37 @@ def hexToRGB(hexCode) :
     
     return rgbValues
 
+def cmykToRGB(cmykValues) :
+    x       = 1 - (cmykValues[3] / 100)
+    red     = 255 * (1 - (cmykValues[0] / 100)) * x
+    green   = 255 * (1 - (cmykValues[1] / 100)) * x
+    blue    = 255 * (1 - (cmykValues[2] / 100)) * x
+    
+    return [int(red), int(green), int(blue)]
+
+
+
+
 ##
 # CMYK CONVERSION SECTION
 ##
 
-def convertFromCMYK() :
-    print('huh')
+def convertFromCMYK(color) :
+    # cleanse any non-numerical stuff
+    if len(color) == 1 :
+        color = color[0].lower().strip('cmyk(').strip(')').replace('%', '').replace(' ', '').split(',')
+
+    cmykValues = validateCMYK(color) 
+    if cmykValues is None :
+        return
+
+    print('convert CMYK: ', cmykValues, '\n')
+
+    rgbValues = cmykToRGB(cmykValues)
+    print('RGB: ', rgbValues)
+
+    hexCode = rgbToHex(rgbValues)
+    print('Hex: ', hexCode)
 
 def rgbToCMYK(rgbValues) :
     # Normalize RGB values
@@ -141,12 +166,10 @@ def rgbToCMYK(rgbValues) :
     magenta     = (1 - normalGreen - black) / x
     yellow      = (1 - normalBlue - black)  / x
     
-    return [cyan, magenta, yellow, black]
+    return [round(cyan * 100, 2), round(magenta * 100, 2), round(yellow * 100, 2), round(black * 100, 2)]
 
 
-def cmykToRGB(cmykValues) :
-    print('ddf')
-    
+
 ##
 # INPUT VALIDATION SECTION
 ##
@@ -168,45 +191,45 @@ def validateHex(value) :
 
     return True
 
-
-# Takes in a list of numerical strings. Returns True if valid RGB values. 
+# Takes in a list of strings. Returns same list as integers if valid RGB values. 
 def validateRGB(values) :
+    intValues = []
+
     if len(values) != 3 :
         print('ERROR: Improper number of values for RGB (should be 3)')
-        return False
+        return 
 
     for value in values :
         if not value.strip().isnumeric() :
             print('ERROR: Improper format for RGB value(s)')
-            return False
+            return 
         value = int(value)
+        intValues.append(value)
         if (value < 0) or (value > 255) :
             print('ERROR: Each RBG value must be between 0-255')
-            return False
-    return True
+            return 
+    
+    return intValues
 
-# Takes in a string. Returns True if valid CMYK values.
+# Takes in a list of strings. Returns same list as integers if valid CMYK values.
 def validateCMYK(values) :
+    intValues = []
+
     if len(values) != 4 :
         print('ERROR: Improper number of values for CMYK (should be 4)')
-        return False
+        return
     
     for value in values :
         if not value.isnumeric() :
             print('ERROR: Improper format for CMYK value(s). All values must be numeric and between 0-100(%)!')
-            return False
+            return
         value = int(value)
+        intValues.append(value)
         if (value < 0) or (value > 100) :
             print('ERROR: Each CMYK value must be between 0-100(%)')
-            return False
+            return
     
-    return True
-
-   
-
-##
-# GENERAL UTILITIES
-##
+    return intValues
 
 # Takes in the program's arguments generated by argparse. Returns True if valid arguments
 def validateArguments(args) :
@@ -226,7 +249,14 @@ def validateArguments(args) :
         return False
     
     return True
- 
+
+
+
+
+
+##
+# GENERAL UTILITIES
+##
 
 # Takes in a decimal number and converts it to hexadecimal
 def hex(number) :
