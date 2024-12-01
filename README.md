@@ -31,3 +31,7 @@ maybe these ideas branch off into separate projects themselves, but:
 - accept images as output and print out the average color (of all pixels) in any format
 - TUI color picker??? maybe look into the interface platforms that ncspot uses for mouse input
 - accept images as output and some sort of color code that gets applied to said image (like a CLI program for applying color filters to images)
+
+## Conversion Sources
+[Hex<->RGB](!https://en.wikipedia.org/wiki/Web_colors)
+[RGB<->CMYK](!https://thecolorsmeaning.com/rgb-to-cmyk/)
