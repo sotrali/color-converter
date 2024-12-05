@@ -3,8 +3,8 @@ import argparse
 
 # Order of types must match order of arguments defined
 # (or else arg validation will no longer work properly)
-TYPES = ['hex', 'rgb', 'cmy', 'cmyk']
-# look into CMY, HSL, HSV
+TYPES = ['hex', 'rgb', 'cmy', 'cmyk', 'hsl', 'hsv']
+# look into LAB
 
 HEX_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f']
 
@@ -18,6 +18,8 @@ def main():
     parser.add_argument('-cmy', action='store_true', help='convert from CMY (accepts integer input [C M Y], or string [\"cmy(C, M, Y)\"] (case/whitespace insensitive)')
     parser.add_argument('-cmyk', action='store_true', help='convert from CMYK (accepts integer input [C M Y K], or string [\"cmyk(C, M, Y, K)\"] (case/whitespace insensitive)')
     parser.add_argument('color', nargs='*', help='accepts a color in Hex, RGB, CMY, CMYK, or HSL and performs format conversions (does not support CMYK profiles, conversions are uncalibrated)')
+    parser.add_argument('-hsl', action='store_true', help='convert from HSL (accepts integer input [H S L], or string [\"hsl(H, S, L)\"] (case/whitespace insensitive)')
+    parser.add_argument('-hsv', action='store_true', help='convert from HSV (accepts integer input [H S V], or string [\"hsv(H, S, V)\"] (case/whitespace insensitive)')
     args = parser.parse_args()
 
 
@@ -45,7 +47,14 @@ def main():
     # HANDLE CMYK INPUT
     if args.cmyk :
         handleCMYK(color)
+    
+    # HANDLE HSL INPUT
+    if args.hsl :
+        handleHSVorHSL(color, True)
 
+    # HANDLE HSV INPUT
+    if args.hsv :
+        handleHSVorHSL(color, False)
 
 
 
@@ -65,12 +74,15 @@ def handleHex(color) :
     rgbValues = hexToRGB(hexCode)
     cmyValues = rgbToCMY(rgbValues)
     cmykValues = rgbToCMYK(rgbValues)
+    hslValues = rgbToHSVorHSL(rgbValues, True)
+    hsvValues = rgbToHSVorHSL(rgbValues, False)
 
-    print("RGB: ", rgbValues)
-    print("CMY: ", cmyValues)
-    print("CMYK: ", cmykValues)
+    print('RGB: ', rgbValues)
+    print('CMY: ', cmyValues)
+    print('CMYK: ', cmykValues)
+    print('HSL: ', hslValues)
+    print('HSV: ', hsvValues)
 
-   # convertToHSL('hex', code)
 
 # Takes in valid RGB code and converts it to the other formats
 def handleRGB(color) :
@@ -90,18 +102,20 @@ def handleRGB(color) :
     hexCode = rgbToHex(rgbValues)
     cmyValues = rgbToCMY(rgbValues)
     cmykValues = rgbToCMYK(rgbValues)
+    hslValues = rgbToHSVorHSL(rgbValues, True)
+    hsvValues = rgbToHSVorHSL(rgbValues, False)
     
     print('CMYK: ', cmykValues)
     print('Hex: ', hexCode)
     print('CMY: ', cmyValues)
-
-    # convertToHSL('rgb', rgbValues)
+    print('HSL: ', hslValues)
+    print('HSV: ', hsvValues)
 
 def handleCMY(color) :
     # cleanse any non-numerical stuff
     if len(color) == 1 :
         color = color[0].lower().strip('cmy(').strip(')').replace('%', '').replace(' ', '').split(',')
-    cmyValues = validateCMYK(color, False) 
+    cmyValues = validateCMYorCMYK(color, False) 
     if cmyValues is None :
         return
 
@@ -110,16 +124,20 @@ def handleCMY(color) :
     rgbValues = cmyToRGB(cmyValues)
     hexCode = rgbToHex(rgbValues)
     cmykValues = rgbToCMYK(rgbValues)
+    hslValues = rgbToHSVorHSL(rgbValues, True)
+    hsvValues = rgbToHSVorHSL(rgbValues, False)
 
     print('Hex: ', hexCode)
     print('RGB: ', rgbValues)
     print('CMYK: ', cmykValues)
+    print('HSL: ', hslValues)
+    print('HSV: ', hsvValues)
 
 def handleCMYK(color) :
     # cleanse any non-numerical stuff
     if len(color) == 1 :
         color = color[0].lower().strip('cmyk(').strip(')').replace('%', '').replace(' ', '').split(',')
-    cmykValues = validateCMYK(color, True) 
+    cmykValues = validateCMYorCMYK(color, True) 
     if cmykValues is None :
         return
 
@@ -128,11 +146,45 @@ def handleCMYK(color) :
     rgbValues = cmykToRGB(cmykValues)
     hexCode = rgbToHex(rgbValues)
     cmyValues = rgbToCMY(rgbValues)
+    hslValues = rgbToHSVorHSL(rgbValues, True)
+    hsvValues = rgbToHSVorHSL(rgbValues, False)
 
     print('Hex: ', hexCode)
     print('RGB: ', rgbValues)
     print('CMY: ', cmyValues)
+    print('HSL: ', hslValues)
+    print('HSV: ', hsvValues)
 
+# isHSL determines whether the function should handle HSL or HSV
+def handleHSVorHSL(color, isHSL) :
+    # cleanse color code
+    if len(color) == 1 :
+        if isHSL :
+            color = color[0].lower().strip('hsl(').strip(')').replace('%', '').replace(' ', '').split(',')
+        else : # is HSV
+            color = color[0].lower().strip('hsv(').strip(')').replace('%', '').replace(' ', '').split(',')
+
+    validated = validateHSLorHSV(color)
+    if validated is None :
+        return
+    
+    rgbValues = hslOrHSVToRGB(validated, isHSL)
+    hexCode = rgbToHex(rgbValues)
+    cmyValues = rgbToCMY(rgbValues)
+    cmykValues = rgbToCMYK(rgbValues)
+    if isHSL :
+        hsvValues = rgbToHSVorHSL(rgbValues, isHSL)   
+    else : # is HSV
+        hslValues = rgbToHSVorHSL(rgbValues, isHSL)
+
+    print('Hex: ', hexCode)
+    print('RGB: ', rgbValues)
+    print('CMY: ', cmyValues)
+    print('CMYK: ', cmykValues)
+    if isHSL :
+        print('HSV: ', hsvValues)
+    else :
+        print('HSL: ', hslValues)
 
 
 
@@ -178,7 +230,7 @@ def rgbToCMY(rgbValues) :
     magenta = 1 - normalGreen
     yellow  = 1 - normalBlue 
 
-    return [round(cyan * 100, 2), round(magenta * 100, 2), round(yellow * 100, 2)]
+    return [cyan * 100, magenta * 100, yellow * 100]
 
 # Takes in a list of 3 integers, returns a list of 4 floats (percentages)
 def rgbToCMYK(rgbValues) :
@@ -198,7 +250,51 @@ def rgbToCMYK(rgbValues) :
         magenta = (1 - normalGreen - black) / x
         yellow  = (1 - normalBlue - black)  / x
     
-    return [round(cyan * 100, 2), round(magenta * 100, 2), round(yellow * 100, 2), round(black * 100, 2)]
+    return [cyan * 100, magenta * 100, yellow * 100, black * 100]
+
+# Takes in a list of 3 integers, returns a list of 1 integer and 2 floats (percentages)
+def rgbToHSVorHSL(rgbValues, isHSL) :
+    hue = 0
+    saturation = 0.0
+    value = 0.0
+    lightness = 0.0
+
+    # Normalize RGB values
+    normalRed   = rgbValues[0] / 255
+    normalGreen = rgbValues[1] / 255
+    normalBlue  = rgbValues[2] / 255
+
+    # Establish variables for formula
+    xMax = max(normalRed, normalGreen, normalBlue)
+    xMin = min(normalRed, normalGreen, normalBlue)
+    chroma = xMax - xMin
+    
+    # Convert
+
+    value = xMax
+    lightness = (xMax + xMin) / 2
+
+    if chroma == 0 :
+        hue = 0
+    elif value == normalRed :
+        hue = 60 * ((normalGreen - normalBlue) / chroma) % 6
+    elif value == normalGreen :
+        hue = 60 * (((normalBlue - normalRed) / chroma) + 2)
+    elif value == value == normalBlue :
+        hue = 60 * (((normalRed - normalGreen) / chroma) + 4)
+
+
+    if isHSL :
+        if (lightness != 0) and (lightness != 1) :
+            saturation = (value - lightness) / min(lightness, 1 - lightness)     
+            # else : keep zero
+        return [int(hue), saturation * 100, lightness * 100]
+    else :
+        if value != 0 :
+            saturation = chroma / value
+        # else : keep zero
+        return [int(hue), saturation * 100, value * 100]
+
 
 # Takes in a list of 3 floats, returns a list of 3 integers
 def cmyToRGB(cmyValues) :
@@ -217,6 +313,59 @@ def cmykToRGB(cmykValues) :
     
     return [smartRound(red), smartRound(green), smartRound(blue)]
 
+# Takes in a list with 1 integer and 2 floats (in that order), and returns 3 integers
+def hslOrHSVToRGB(values, isHSL) :
+    print('hslToRGB: ', values)
+    
+    normalSaturation = values[1] / 100
+    normalLorV= values[2] / 100
+
+    # Perform first part of conversion
+    if isHSL :
+        chroma = (1 - math.fabs((2 * normalLorV) - 1)) * normalSaturation
+    else : # is HSV
+        chroma = normalLorV * normalSaturation
+    
+    hPrime = int(values[0] / 60)
+    x = chroma * (1 - math.fabs(hPrime % 2 - 1))
+    m = normalLorV - (chroma / 2)
+
+    if (hPrime >= 0) and (hPrime < 1) :
+        R = chroma + m
+        G = x + m
+        B = 0 + m
+        return [R * 255, G * 255, B * 255]
+    elif (hPrime >= 1) and (hPrime < 2) :
+        R = x + m
+        G = chroma + m
+        B = 0 + m
+        return [R * 255, G * 255, B * 255]
+    elif (hPrime >= 2) and (hPrime < 3) :
+        R = 0 + m
+        G = chroma + m
+        B = x + m
+        return [R * 255, G * 255, B * 255]
+    elif (hPrime >= 3* 255) and (hPrime < 4) :
+        R = 0 + m
+        G = x + m
+        B = chroma + m
+        return [R * 255, G * 255, B * 255]
+    elif (hPrime >= 4) and (hPrime < 5) :
+        R = x + m
+        G = 0 + m
+        B = chroma + m
+        return [R * 255, G * 255, B * 255]
+    elif (hPrime >= 5) and (hPrime <= 6) :
+        R = chrome + m
+        G = 0 + m
+        B = x + m
+        return [R * 255, G * 255, B * 255]
+    else :
+        print('RGB to HSV/HSL conversion failed')
+        return
+
+def hsvToRGB(rgbValues) :
+    print('hsvToRGB')
 
 ##
 # VALIDATION SECTION
@@ -240,7 +389,7 @@ def validateHex(value) :
 
     return True
 
-# Takes in a list of strings. Returns same list as integers if valid RGB values. 
+# Takes in a list of 3 strings. Returns same list as integers if valid RGB values. 
 def validateRGB(values) :
     intValues = []
 
@@ -260,15 +409,14 @@ def validateRGB(values) :
     
     return intValues
 
-# Takes in a list of strings. Returns same list as integers if valid CMYK values.
-def validateCMYK(values, include_K) :
+# Takes in a list of 3 or 4 strings. Returns same list as integers if valid CMYK values.
+def validateCMYorCMYK(values, include_K) :
     floatValues = []
 
     if (include_K and len(values) != 4) :
         print('ERROR: Improper number of values for CMYK (should be 4)')
         return
-
-    if (not include_K and len(values) != 3) :
+    elif (not include_K and len(values) != 3) :
         print('ERROR: Improper number of values for CMY (should be 3)')
         return
 
@@ -283,6 +431,33 @@ def validateCMYK(values, include_K) :
             return
     
     return floatValues
+
+# Takes in a list of 3 strings. Returns same list as 1 integer and 2 floats
+def validateHSLorHSV(values) :
+    if len(values) != 3 :
+        print('ERROR: Improper number of values for HSL/HSV (should be 3)')
+        return
+
+    for i in range(3) :
+        if not values[i].replace('.', '').isnumeric() :
+            print('ERROR: HSL/HSV values must be numeric')
+            return
+        if i == 0 :
+            values[i] = smartRound(values[i])
+        else :
+            values[i] = float(values[i])
+
+    if (values[0] < 0) or (values[0] > 255) :
+        print('ERROR: Invalid hue value (should be 0-255)')
+        return
+    if (values[1] < 0) or (values[1] > 100) :
+        print('ERROR: Invalid saturation value (should be 0.0-100.0)')
+        return
+    if (values[2] < 0) or (values[2] > 100) :
+        print('ERROR: Invalid lightness/value value (should be 0.0-100.0)')
+        return
+
+    return [values[0], values[1], values[2]]
 
 # Takes in the program's arguments generated by argparse. Returns True if valid arguments
 def validateArguments(args) :
@@ -312,6 +487,7 @@ def validateArguments(args) :
 
 # Takes in a float, returns the nearest integer
 def smartRound(value) :
+    value = float(value)
     if (value % 1) > .50 :
         return math.ceil(value)
     else :
