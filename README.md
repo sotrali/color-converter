@@ -34,11 +34,21 @@ maybe these ideas branch off into separate projects themselves, but:
 
 ## Conversion Sources
 Hex<->RGB: 
+
 https://en.wikipedia.org/wiki/Web_colors
 
 RGB<->CMYK: 
+
 https://www.101computing.net/cmyk-to-rgb-conversion-algorithm/
+
 https://thecolorsmeaning.com/rgb-to-cmyk/
 
 RGB<->CMY:
+
 http://colormine.org/convert/rgb-to-cmy
+
+
+
+RGB<->HSL:
+
+https://www.baeldung.com/cs/convert-color-hsl-rgb
