@@ -1,3 +1,6 @@
+## todo
+write a general validator function for grabbing numbers
+
 # color-converter
 A CLI utility written in Python that translates color codes to other formats.
 
@@ -26,11 +29,6 @@ That said, as I develop this, I see lots of room for improvement. Such as:
 - combine the last two bullet points and boom: now the tool could take a whole list of colors in X format and spit out a file where every color is in Y format
 - (to expand on ^) if we had automatic format detection and formatting output flags, you could pass in a whole file of any color formats and standardize them to a given format.
 
-
-maybe these ideas branch off into separate projects themselves, but:
-- accept images as output and print out the average color (of all pixels) in any format
-- TUI color picker??? maybe look into the interface platforms that ncspot uses for mouse input
-- accept images as output and some sort of color code that gets applied to said image (like a CLI program for applying color filters to images)
 
 ## Conversion Sources
 Hex<->RGB: 
