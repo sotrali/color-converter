@@ -50,3 +50,5 @@ http://colormine.org/convert/rgb-to-cmy
 RGB<->HSL:
 
 https://www.baeldung.com/cs/convert-color-hsl-rgb
+
+https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB
