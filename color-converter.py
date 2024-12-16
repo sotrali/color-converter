@@ -32,7 +32,13 @@ def main():
         return;
 
     color = args.color
-    
+
+    ## HERE IS WHERE WE WOULD DETERMINE IF THIS IS MULTILINE INPUT
+
+    # Try to autodetect format. if detected, will kick off the rest of the process 
+    if detectColorFormat(color) :
+        return; 
+
     # HANDLE HEX INPUT
     if args.hex :
         handleHex(color)
@@ -344,6 +350,53 @@ def HSLorHSVToRGB(values, convertFrom) :
 # INPUT VALIDATION 
 ##
 
+def detectColorFormat(color) :
+    if color.strip()[0] == '#' :
+        handleHex(color)
+        return True
+    elif color.strip().startswith('rgb') :
+        handleRGB(color)
+        return True
+    elif color.strip.startswith('cmyk') :
+        handleCMYK(color)
+        return True
+    elif color.strip.startswith('cmy') :
+        handleCMY(color)
+        return True
+    elif color.strip.startswith('hsl') :
+        handleHSVorHSL(color, 'hsl')
+        return True
+    elif color.strip.startswith('hsv') :
+        handleHSVorHSL(color, 'hsv')
+        return True
+    else :
+        return False
+
+# Takes in a string and an integer. Starts at beginning of string and parses as many int/float values as defined by numValues. Returns a list of numbers in string form, will need to be cast upon return.
+def extractValues(color, numValues) :
+    i = 0
+    tempValue = ''
+    extractedValues = []
+
+    while i < len(color) :
+        if color[i].isnumeric() or color[i] == '.' :
+            tempValues += color[i]
+        elif len(tempValue) > 0 :
+            extractedValues.append(tempValue)
+            tempValue = ''
+        if len(extractedValues) == numValues :
+            break
+    if (len(extractedValues) != numValues) and (len(tempValue) > 0) :
+        extractedValues.append(tempValue)
+
+    if len(extractedValues != numValues) :
+        print(f'Could not extract the desired number of values from input. Values requested: {numValues}, values extracted: {len(extractedValues)}, {extractedValues}')
+        return False
+
+    return extractedValues
+
+
+
 # Takes in a string. Returns True if valid Hex color code.
 def validateHex(value) :
     # cleanse hex code
@@ -368,11 +421,12 @@ def validateHex(value) :
 def validateRGB(color) :
     # cleanse any non-numerical stuff if entered as string
     if len(color) == 1 :
-        color = color[0].lower().strip('rgb(').strip(')').replace(' ', '').split(',')
+        #color = color[0].lower().strip('rgb(').strip(')').replace(' ', '').split(',')
+        color = extractValues(color, 3)
 
-    if len(color) != 3 :
-        print('ERROR: Improper number of values for RGB (should be 3)')
-        return 
+    #if len(color) != 3 :
+        #print('ERROR: Improper number of values for RGB (should be 3)')
+        #return 
 
     intValues = []
     for value in color :
