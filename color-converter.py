@@ -1,30 +1,24 @@
 import math
 import argparse
 
-# Order of types must match order of arguments defined
-# (or else arg validation will no longer work properly)
 TYPES = ['hex', 'rgb', 'cmy', 'cmyk', 'hsl', 'hsv']
 # look into LAB
 
 HEX_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f']
 
 OUTPUT  = 'stdout'
-APPEND  = False
 VERBOSE = False
 
 
 def main():
 
-    # Set up arguments
-    parser = argparse.ArgumentParser(prog='color-converter',
-                    description='Color code converting utility written in Python.',
-                    epilog='Hope this helps :)')
-    
+    ''' ESTABLISH ARGS '''
+    parser = argparse.ArgumentParser(prog='color-converter', description='Color code converting utility written in Python.', epilog='Hope this helps :)')
     
     parser.add_argument('-hex',  action='store_true', help='convert/output to Hex')
     parser.add_argument('-rgb',  action='store_true', help='convert/output to RGB')
     parser.add_argument('-cmy',  action='store_true', help='convert/output to CMY')
-    parser.add_argument('-cmyk', action='store_true', help='convert/output to CMYK')
+    parser.add_argument('-cmyk', action='store_true', help='convert/output to CMYK (CMYK conversions are uncalibrated)')
     parser.add_argument('-hsl',  action='store_true', help='convert/output to HSL')
     parser.add_argument('-hsv',  action='store_true', help='convert/output to HSV')
         
@@ -36,19 +30,15 @@ def main():
     parser.add_argument('-isHsv',  action='store_true', help='indicate that inputted value(s) will be sets of HSL codes')
     
     parser.add_argument('--input',   '-i', help='name of the input file containing color codes to process')
-    parser.add_argument('--output',  '-o', help='the name of the file to store output in (will create file if doesn\'t exist, will OVERWRITE existing file\'s contents)')
-    parser.add_argument('--append',  '-a', action='store_true', help='append rather than overwrite file output')
+    parser.add_argument('--output',  '-o', help='the name of a file to store output in (will create file if doesn\'t exist, will OVERWRITE existing file\'s contents)')
+    parser.add_argument('--append',  '-a', action='store_true', help='append rather than overwrite when outputting to file rather than stdout')
     parser.add_argument('--verbose', '-v', action='store_true', help='print when performing conversions')
     
-    parser.add_argument('color', nargs='*', help='accepts a color in Hex, RGB, CMY, CMYK, or HSL and performs format conversions (does not support CMYK profiles, conversions are uncalibrated)')
+    parser.add_argument('color', nargs='*', help='a color in Hex, RGB, CMY, CMYK, HSL or HSV format')
     args = parser.parse_args()
 
 
-    # debug print
-    # print(vars(args))
-
-
-    ''' ARGS PROCESSING '''
+    ''' PROCESS ARGS '''
     # determine which conversions to perform 
     outputFormats = []
     flagsActive = 0
@@ -62,19 +52,19 @@ def main():
         for colorFormat in TYPES :
             outputFormats.append(colorFormat)
         
-    # if output should be written to file, set global vars for reference later
+    # determine if output should be (over?)written to file
     if args.output :
         global OUTPUT
         OUTPUT = args.output
-        if args.append :
-            global APPEND 
-            APPEND = True
+        if not args.append :
+            output_file = open(OUTPUT, 'w')
+            output_file.write('')
+            output_file.close()
 
     # print conversion updates? 
     if args.verbose : 
         global VERBOSE
         VERBOSE = True
-
 
 
     ''' PARSE INPUTTED COLORS '''
@@ -83,11 +73,12 @@ def main():
     if args.input :
         with open(args.input, 'r', encoding='utf-8') as file :
             for line in file :
-                colorCodes.append(line.strip())
+                line = line.strip()
+                if line != '' :
+                    colorCodes.append(line)
     # else grab from stdin
     else :
         colorCodes = args.color    
-
 
 
     ''' PROCESS COLORS '''
@@ -112,180 +103,169 @@ def main():
         else :
             print('ERROR: Could not detect inputted color format and no fallback flag was specified. see --help for more information on usage.')
             return
-    
     return
 
 
-
-##
+'''
 # FORMAT HANDLERS
-##
-
+'''
 
 # ARGS
 # color: string containing hex code
-# outputFormats: list indicating which conversions to perform 
+# outputFormats: list indicating which conversions to perform
 def handleHex(color, outputFormats) :
-    hexCode = validateHex(color)
-    if hexCode is None :
+    # validate/sanitize input
+    hexcode = validateHex(color)
+    if hexcode is None :
         return
 
+    # collect conversion results
+    results = {}
     if VERBOSE :
-        print('CONVERTING HEX: ', hexCode)
+        results['verbose-msg'] = 'CONVERTING HEX: ' + hexcode
 
-    outputs = {}
-    rgbValues = HEXtoRGB(hexCode)
-    if 'hex' in outputFormats :
-        outputs['hex']  = hexCode
-    if 'rgb' in outputFormats :
-        outputs['rgb']  = rgbValues
-    if 'cmy' in outputFormats :
-        outputs['cmy']  = RGBtoCMY(rgbValues)
-    if 'cmyk' in outputFormats :
-        outputs['cmyk'] = RGBtoCMYK(rgbValues)
-    if 'hsl' in outputFormats :
-        outputs['hsl']  = RGBtoHSVorHSL(rgbValues, 'hsl')
-    if 'hsv' in outputFormats :
-        outputs['hsv']  = RGBtoHSVorHSL(rgbValues, 'hsv')
+    rgbValues = HEXtoRGB(hexcode)
+    for colorFormat in TYPES :
+        if colorFormat in outputFormats and colorFormat == 'hex' :
+            results['hex'] = hexcode
+        elif colorFormat in outputFormats and colorFormat == 'rgb' :
+            results['rgb'] = rgbValues
+        elif colorFormat in outputFormats :
+            results[colorFormat] = rgbTo(colorFormat, rgbValues)
 
-    printConversions(outputs)
+    printConversions(results)
 
 
 # ARGS
 # color: string containing RGB code
 # outputFormats: list indicating which conversions to perform 
 def handleRGB(color, outputFormats) :
+    # validate/sanitize input
     rgbValues = validateRGB(color)
     if rgbValues is None :
         return
 
+    # collect conversion results
+    results = {}
     if VERBOSE :
-        print('CONVERTING RGB: ', rgbValues)
+        results['verbose-msg'] = 'CONVERTING RGB: ' + str(rgbValues)
     
-    outputs = {}
-    if 'hex' in outputFormats :
-        outputs['hex']  = RGBtoHEX(rgbValues)
-    if 'rgb' in outputFormats :
-        outputs['rgb']  = rgbValues
-    if 'cmy' in outputFormats :
-        outputs['cmy']  = RGBtoCMY(rgbValues)
-    if 'cmyk' in outputFormats :
-        outputs['cmyk'] = RGBtoCMYK(rgbValues)
-    if 'hsl' in outputFormats :
-        outputs['hsl']  = RGBtoHSVorHSL(rgbValues, 'hsl')
-    if 'hsv' in outputFormats :
-        outputs['hsv']  = RGBtoHSVorHSL(rgbValues, 'hsv')
+    for colorFormat in TYPES :
+        if colorFormat in outputFormats and colorFormat == 'rgb' :
+            results['rgb'] = rgbValues
+        elif colorFormat in outputFormats :
+            results[colorFormat] = rgbTo(colorFormat, rgbValues)
     
-    printConversions(outputs)
+    printConversions(results)
 
 # ARGS
 # color: string containing CMY code
 # outputFormats: list indicating which conversions to perform 
 def handleCMY(color, outputFormats) :
+    # validate/sanitize input
     cmyValues = validateCMYorCMYK(color, False) 
     if cmyValues is None :
         return
 
+    # collect conversion results
+    results = {}
     if VERBOSE :
-        print('CONVERTING CMY: ', cmyValues)
+        results['verbose-msg'] = 'CONVERTING CMY: ' + str(cmyValues)
 
-    outputs = {}
     rgbValues = CMYtoRGB(cmyValues)
-    if 'hex' in outputFormats :
-        outputs['hex']  = RGBtoHEX(rgbValues)
-    if 'rgb' in outputFormats :
-        outputs['rgb']  = rgbValues
-    if 'cmy' in outputFormats :
-        outputs['cmy']  = cmyValues
-    if 'cmyk' in outputFormats :
-        outputs['cmyk'] = RGBtoCMYK(rgbValues)
-    if 'hsl' in outputFormats :
-        outputs['hsl']  = RGBtoHSVorHSL(rgbValues, 'hsl')
-    if 'hsv' in outputFormats :
-        outputs['hsv']  = RGBtoHSVorHSL(rgbValues, 'hsv')
+    for colorFormat in TYPES :
+        if colorFormat in outputFormats and colorFormat == 'rgb' :
+            results['rgb'] = rgbValues
+        elif colorFormat in outputFormats and colorFormat == 'cmy' :
+            results['cmy'] = cmyValues
+        elif colorFormat in outputFormats :
+            results[colorFormat] = rgbTo(colorFormat, rgbValues)
 
-    printConversions(outputs)
+    printConversions(results)
 
 # ARGS
 # color: string containing CMYK code
 # outputFormats: list indicating which conversions to perform 
 def handleCMYK(color, outputFormats) :
+    # validate/sanitize input
     cmykValues = validateCMYorCMYK(color, True) 
     if cmykValues is None :
         return
 
+    # collect conversion results
+    results = {}
     if VERBOSE :
-        print('CONVERTING CMYK: ', cmykValues)
+        results['verbose-msg'] = 'CONVERTING CMYK: ' + str(cmykValues)
  
-    outputs = {}
     rgbValues = CMYKtoRGB(cmykValues)
-    if 'hex' in outputFormats :
-        outputs['hex']  = RGBtoHEX(rgbValues)
-    if 'rgb' in outputFormats :
-        outputs['rgb']  = rgbValues
-    if 'cmy' in outputFormats :
-        outputs['cmy']  = RGBtoCMY(rgbValues)
-    if 'cmyk' in outputFormats :
-        outputs['cmyk'] = cmykValues
-    if 'hsl' in outputFormats :
-        outputs['hsl']  = RGBtoHSVorHSL(rgbValues, 'hsl')
-    if 'hsv' in outputFormats :
-        outputs['hsv']  = RGBtoHSVorHSL(rgbValues, 'hsv')
+    for colorFormat in TYPES :
+        if (colorFormat in outputFormats) and (colorFormat == 'rgb') :
+            results['rgb'] = rgbValues
+        elif (colorFormat in outputFormats) and (colorFormat == 'cmyk') :
+            results['cmyk'] = cmykValues
+        elif colorFormat in outputFormats :
+            results[colorFormat] = rgbTo(colorFormat, rgbValues)
 
-    printConversions(outputs)
+    printConversions(results)
 
 # ARGS
 # color: string containing CMY code
 # outputFormats: list indicating which conversions to perform 
 # handle: string ('hsl' or 'hsv'), indicating which format to handle 
 def handleHSVorHSL(color, handle, outputFormats) :
+    # collect conversion results
     validated = validateHSLorHSV(color)
     if validated is None :
         return
 
+    # collect conversion results
+    results = {}
     if VERBOSE :
         if handle == 'hsl' :
-            print('CONVERTING HSL: ', color)
+            results['verbose-msg'] = 'CONVERTING HSL: ' + str(validated)
         else :
-            print('CONVERTING HSV: ', color)
+            results['verbose-msg'] = 'CONVERTING HSV: ' + str(validated)
     
-    outputs = {}
     rgbValues = HSLorHSVToRGB(validated, handle)
-    if 'hex' in outputFormats :
-        outputs['hex']  = RGBtoHEX(rgbValues)
-    if 'rgb' in outputFormats :
-        outputs['rgb']  = rgbValues
-    if 'cmy' in outputFormats :
-        outputs['cmy']  = RGBtoCMY(rgbValues)
-    if 'cmyk' in outputFormats :
-        outputs['cmyk'] = RGBtoCMYK(rgbValues)
-    if 'hsl' in outputFormats :
-        outputs['hsl']  = RGBtoHSVorHSL(rgbValues, 'hsl')
-    if 'hsv' in outputFormats :
-        outputs['hsv']  = RGBtoHSVorHSL(rgbValues, 'hsv')
+    for colorFormat in TYPES :
+        if (colorFormat in outputFormats) and (colorFormat == 'rgb') :
+            results['rgb'] = rgbValues
+        elif (colorFormat in outputFormats) and (colorFormat == 'hsl') and (handle == 'hsl') :
+            results['hsl'] = validated
+        elif (colorFormat in outputFormats) and (colorFormat == 'hsv') and (handle == 'hsv'):
+            results['hsv'] = validated
+        elif colorFormat in outputFormats :
+            results[colorFormat] = rgbTo(colorFormat, rgbValues)
 
-    printConversions(outputs)
+    printConversions(results)
 
 
+
+'''
+# CONVERSION FUNCTIONS
+'''
 
 ##
-#  CONVERSION FUNCTIONS
-##
+# RGB -> OTHER FORMATS SECTION 
+###
 
-# Takes in a string, returns a list of 3 integers
-def HEXtoRGB(hexCode) :
-    rgbValues = []
-
-    tempSum = 0
-    i = 0
-    while i < 6 :
-        tempSum += int(hexCode[i], 16) * 16
-        tempSum += int(hexCode[i+1], 16)
-        rgbValues.append(tempSum)
-        i = i + 2
-        tempSum = 0
-    
-    return rgbValues
+# rgbTo() acts as an interface between format handlers and RGB conversions (for easier addition of formats later)
+# ARGS
+# colorFormat: a string containing a color format to convert to
+# rgbValues: the rgbValues to convert
+# RETURNS
+# the converted color values in the specified format
+def rgbTo(colorFormat, rgbValues) :
+    if colorFormat == 'hex' :
+        return RGBtoHEX(rgbValues)
+    if colorFormat == 'cmy' :
+        return RGBtoCMY(rgbValues)
+    if colorFormat == 'cmyk' :
+        return RGBtoCMYK(rgbValues)
+    if colorFormat == 'hsl' :
+        return RGBtoHSVorHSL(rgbValues, 'hsl')
+    if colorFormat == 'hsv' :
+        return RGBtoHSVorHSL(rgbValues, 'hsv')
 
 # Takes in a list of 3 integers, returns a string
 def RGBtoHEX(rgbValues) :
@@ -371,6 +351,24 @@ def RGBtoHSVorHSL(rgbValues, convertTo) :
         return [hue, saturation * 100, value * 100]
 
 
+##
+# OTHER FORMATS -> RGB SECTION
+##
+
+# Takes in a string, returns a list of 3 integers
+def HEXtoRGB(hexCode) :
+    rgbValues = []
+
+    tempSum = 0
+    i = 0
+    while i < 6 :
+        tempSum += int(hexCode[i], 16) * 16
+        tempSum += int(hexCode[i+1], 16)
+        rgbValues.append(tempSum)
+        i = i + 2
+        tempSum = 0
+    
+    return rgbValues
 # Takes in a list of 3 floats, returns a list of 3 integers
 def CMYtoRGB(cmyValues) :
     red     = (1 - (cmyValues[0] / 100)) * 255
@@ -434,15 +432,100 @@ def HSLorHSVToRGB(values, convertFrom) :
         R = chrome + m
         G = 0 + m
         B = x + m
-        return [smartRound(R * 255), smartRound(G * 255), smartRound(B * 255)]
+        return [int(R * 255), int(G * 255), int(B * 255)]
     else :
         print('RGB to HSV/HSL conversion failed')
         return
 
-##
-# INPUT VALIDATION 
-##
 
+'''
+# INPUT VALIDATION 
+'''
+
+# Takes in a string. 
+# If string contains a valid Hex color code, it gets returned as a string.
+def validateHex(value) :
+    # attempt to extract hex code
+    hexcode = extractValues(value, 1, True)[0]
+
+    if not hexcode :
+        print('ERROR: Improper format for hex code (see --help)')
+        return 
+
+    return hexcode 
+
+# Takes in a string. Returns same list as integers if valid RGB values. 
+def validateRGB(color) :
+    # extract 3 numbers from the provided values
+    rgbValues = extractValues(color, 3)
+
+    if not rgbValues : 
+        return
+
+    intValues = []
+    for value in rgbValues :
+        # TODO see if i should smartround here instead of int cast
+        value = smartRound(value)
+        if (value < 0) or (value > 255) :
+            print('ERROR: Each RBG value must be between 0-255')
+            return 
+        intValues.append(value)
+    
+    return intValues
+
+# Takes in a list of 3 or 4 strings. Returns same list as integers if valid CMYK values.
+def validateCMYorCMYK(color, include_K) :
+    if include_K :
+        values = extractValues(color, 4)
+    else :
+        values = extractValues(color, 3)
+    if not values :
+        return
+
+    floatValues = []
+    for value in values :
+        value = float(value)
+        if (value < 0) or (value > 100) :
+            print('ERROR: Each CMY(K) value must be between 0,0-100.0')
+            return
+        floatValues.append(value)
+    
+    return floatValues
+
+# Takes in a list of 3 strings. Returns same list as 1 integer and 2 floats
+def validateHSLorHSV(color) :
+    color = extractValues(color, 3)
+    if color is None :
+        return
+
+    for i in range(3) :
+        if i == 0 :
+            color[i] = smartRound(color[i])
+        else :
+            color[i] = float(color[i])
+
+    if (color[0] < 0) or (color[0] > 255) :
+        print('ERROR: Invalid hue value (should be 0-255)')
+        return
+    if (color[1] < 0) or (color[1] > 100) :
+        print('ERROR: Invalid saturation value (should be 0.0-100.0)')
+        return
+    if (color[2] < 0) or (color[2] > 100) :
+        print('ERROR: Invalid lightness/value value (should be 0.0-100.0)')
+        return
+
+    return [color[0], color[1], color[2]]
+
+
+'''
+# GENERAL UTILITIES
+'''
+
+# ARGS
+# color: a string containing a color value in an unknown format
+# outputFormats: a list containing information necessary for handling conversions, used if format is detected
+# RETURNS
+# truth if success, false if failure to detect a format
 def detectColorFormat(color, outputFormats) :
     if '#' in color :
         handleHex(color, outputFormats)
@@ -466,13 +549,13 @@ def detectColorFormat(color, outputFormats) :
         return False
 
 
-# Extracts numerical values from a string. 
-# Parameters:
+# Extracts numerical (hex or decimal) values from a string. 
+# ARGS
 # color: string containing value(s)
 # numValues: determines how many values to extract (e.g. 3 for RGB, 4 for CMYK)
 # isHex: determines if we're looking for hex rather than decimal
-
-# returns: list of extracted color/number values in string form
+# RETURNS
+# a list of extracted color/number values in string form (or false if faulure to extract)
 def extractValues(color, numValues, isHex = False) :
     i = 0
     tempValue = ''
@@ -519,90 +602,16 @@ def extractValues(color, numValues, isHex = False) :
     return extractedValues
 
 
-
-# Takes in a string. 
-# If string contains a valid Hex color code, it gets returned as a string.
-def validateHex(value) :
-    # attempt to extract hex code
-    hexcode = extractValues(value, 1, True)[0]
-
-    if not hexcode :
-        print('ERROR: Improper format for hex code (see --help)')
-        return 
-
-    return hexcode 
-
-# Takes in a string. Returns same list as integers if valid RGB values. 
-def validateRGB(color) :
-    # extract 3 numbers from the provided values
-    rgbValues = extractValues(color, 3)
-
-    if not rgbValues : 
-        return
-
-    intValues = []
-    for value in rgbValues :
-        # TODO see if i should smartround here instead of int cast
-        value = smartRound(value)
-        if (value < 0) or (value > 255) :
-            print('ERROR: Each RBG value must be between 0-255')
-            return 
-        intValues.append(value)
-    
-    return intValues
-
-# Takes in a list of 3 or 4 strings. Returns same list as integers if valid CMYK values.
-def validateCMYorCMYK(color, include_K) :
-    if include_K :
-        values = extractValues(color, 4)
-    else :
-        values = extractValues(color, 3)
-    if not values :
-        return
-
-    floatValues = []
-    for value in values :
-        value = float(value)
-        if (value < 0) or (value > 100) :
-            print('ERROR: Each CMY(K) value must be between 0,0-100.0(%)')
-            return
-        floatValues.append(value)
-    
-    return floatValues
-
-# Takes in a list of 3 strings. Returns same list as 1 integer and 2 floats
-def validateHSLorHSV(color) :
-    color = extractValues(color, 3)
-    if color is None :
-        return
-
-    for i in range(3) :
-        if i == 0 :
-            color[i] = smartRound(color[i])
-        else :
-            color[i] = float(color[i])
-
-    if (color[0] < 0) or (color[0] > 255) :
-        print('ERROR: Invalid hue value (should be 0-255)')
-        return
-    if (color[1] < 0) or (color[1] > 100) :
-        print('ERROR: Invalid saturation value (should be 0.0-100.0)')
-        return
-    if (color[2] < 0) or (color[2] > 100) :
-        print('ERROR: Invalid lightness/value value (should be 0.0-100.0)')
-        return
-
-    return [color[0], color[1], color[2]]
-
-
-##
-# GENERAL UTILITIES
-##
-
-# takes in a map of color values and either prints their values to STDOUT or into a specified file
-def printConversions(convertedValues) :
-    # format converted values into better output strings
+# formats and delivers color values to STDOUT or a specified output file
+# ARGS
+# convertedValues: a map of the results from the color translations that were performed on a single color value, 
+#                  where the key indicates the format and the value is a list of raw numeric values
+def printConversions(convertedValues) :    
     output = []
+    if VERBOSE : 
+        output.append(convertedValues['verbose-msg'])
+    
+    # format converted values into better output strings
     for colorFormat in TYPES :
         if convertedValues.get(colorFormat, None) is None :
             continue
@@ -623,18 +632,22 @@ def printConversions(convertedValues) :
                     colorCode += str(value) + ', '
             output.append(colorCode)
     
-    # determine how to deliver output
+    # deliver formatted output
     if OUTPUT != 'stdout' :
-        if APPEND : 
-            with open(OUTPUT, 'a', encoding='utf-8') as file :
-                for color in output :
-                    file.write(color + '\n')
-                file.write('\n')
-        else :
-            with open(OUTPUT, 'w', encoding='utf-8') as file :
-                for color in output :
-                    file.write(color + '\n')
-                file.write('\n')
+        
+        ''' 
+        TODO FOR EFFICIENCY:
+
+        right now, unless i'm mistaken and there's some hidden optimization going on, this is 
+        going to open and close the file to write the conversions of each inputted color code.
+        if there's a huge file being used as input, this may get slow, so perhaps the best move is
+        to actually open the file back in main() at the point when we evaluate args, and then close
+        it after everything in main() has ran... food for thought.
+        '''
+        with open(OUTPUT, 'a', encoding='utf-8') as file :
+            for color in output :
+                file.write(color + '\n')
+            file.write('\n')
     else :
         for color in output :
             print(color)
