@@ -349,7 +349,6 @@ def RGBtoHSVorHSL(rgbValues, convertTo) :
     chroma = xMax - xMin
     
     # Convert by following formula
-
     value = xMax
     lightness = (xMax + xMin) / 2
 
@@ -501,8 +500,10 @@ def extractValues(color, numValues, isHex = False) :
         while i < len(color) :
             if color[i].isnumeric() or color[i] == '.' :
                 tempValue += color[i]
-            elif len(tempValue) > 0 :
+            elif len(tempValue) > 0 and tempValue != '.' :
                 extractedValues.append(tempValue)
+                tempValue = ''
+            else :
                 tempValue = ''
             if len(extractedValues) == numValues :
                 break
