@@ -2,8 +2,6 @@
 
 A CLI utility written in Python that translates color codes to other formats.
 
-= actively under construction =
-
 # Project Background
 
 I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place.
