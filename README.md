@@ -1,6 +1,6 @@
 # color-converter
 
-A CLI utility written in Python that translates color codes to other formats.
+A CLI color code conversion utility written in Python.
 
 # Project Background
 
