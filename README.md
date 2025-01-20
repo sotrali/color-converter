@@ -1,20 +1,16 @@
 # color-converter
 
-A CLI color code conversion utility written in Python.
+A robust CLI color conversion utility written in Python.
 
-# Project Background
+# Features
 
-I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place.
-
-Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but I think CLI tools are cool, and I couldn't find any CLI color conversion utilities.
+- Supports conversions between hexcode, RGB, CMY, CMYK, HSL, and HSV
+- Lenient automatic input detection
+- Bulk conversions to and from files
 
 # Usage
 
-This program supports hexcodes, RGB, CMY, CMYK, HSL, and HSV.
-
-Simply supply a color in any of the supported formats as a string, and you will receive the equivalent color codes in all of the supported formats.
-
-For example, a simple input with all conversions:
+Simply supply one or more colors in any of the supported formats as a string, and it will perform all supported conversions.
 
 ```
 $ python color-converter.py "#85feab"
@@ -26,22 +22,23 @@ hsl(138.84, 98.37, 75.88)
 hsv(138.84, 47.64, 99.61)
 ```
 
-You can use flags to limit the output:
+You can also use flags to limit the output:
 
 ```
-$ python color-converter.py -cmy -hsv "#85feab"
-cmy(47.84, 0.39, 32.94)
-hsv(138.84, 47.64, 99.61)
+$ python color-converter.py -rgb "#abc123" "#def456"
+rgb(171, 193, 35)
+
+rgb(222, 244, 86)
+
 ```
 
 ---
 
 It can also function as a color translation utility for converting colors in bulk.
 
-It can handle more than one input on the command line, or you can input files. You can limit the output to one or more specific formats.
-For example, you could take a file that has color codes on each line, each in different formats, and have them all converted to a single format.
+For example, you could take a file that has color codes in various formats and have them all converted to a single format.
 
-For example, use this command:
+To do what was just described, use this command:
 
 ```
 $ python color-converter -cmyk -i "input_file" -o "output_file"
@@ -55,7 +52,7 @@ rgb(1, 2, 3)
 HSV(1, 2, 3)
 ```
 
-and the output file is populated with:
+and the output file gets populated with:
 
 ```
 cmyk(66.67%, 33.33%, 0%, 98.82%)
@@ -73,7 +70,7 @@ For example, these are all valid strings to input 100, 200, and 300 as RGB value
 
 ```
 "rgb(100, 200, 300)"
-"  rgb: 100 200 300"
+"  RGB: 100 200 300"
 "rGb-100 .   200^300"
 ```
 
@@ -84,21 +81,17 @@ While the program will always try to auto-detect the input format, If you only h
 For example:
 
 ```
-$ python color-converter.py -rgb -isHex "123abc"
-rgb(18, 58, 188)
-
-// or
-
-$ python color-converter.py -hsl -isCmy "12 32 90"
-#e0ad19
-rgb(224, 173, 25)
-cmy(12.00, 32.00, 90.00)
-cmyk(0.00, 22.77, 88.84, 12.16)
-hsl(44.62, 79.92, 48.82)
-hsv(44.62, 88.84, 87.84)
+$ python color-converter.py -rgb -isCmyk "1 2 3 4"
+rgb(242, 240, 237)
 ```
 
 (Don't forget to use the `-h` or `--help` flags for in-terminal help)
+
+# Project Background
+
+I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place.
+
+Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but I think CLI tools are cool, and I couldn't find any CLI color conversion utilities.
 
 # Conversion Sources
 

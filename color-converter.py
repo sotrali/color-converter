@@ -6,7 +6,7 @@ TYPES = ['hex', 'rgb', 'cmy', 'cmyk', 'hsl', 'hsv']
 
 HEX_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f']
 
-OUTPUT  = 'stdout'
+OUTPUT_DESTINATION  = 'stdout'
 VERBOSE = False
 
 
@@ -54,10 +54,10 @@ def main():
         
     # determine if output should be (over?)written to file
     if args.output :
-        global OUTPUT
-        OUTPUT = args.output
+        global OUTPUT_DESTINATION
+        OUTPUT_DESTINATION = args.output
         if not args.append :
-            output_file = open(OUTPUT, 'w')
+            output_file = open(OUTPUT_DESTINATION, 'w')
             output_file.write('')
             output_file.close()
 
@@ -446,13 +446,13 @@ def HSLorHSVToRGB(values, convertFrom) :
 # If string contains a valid Hex color code, it gets returned as a string.
 def validateHex(value) :
     # attempt to extract hex code
-    hexcode = extractValues(value, 1, True)[0]
+    hexcode = extractValues(value, 1, True)
 
     if not hexcode :
         print('ERROR: Improper format for hex code (see --help)')
         return 
 
-    return hexcode 
+    return hexcode[0]
 
 # Takes in a string. Returns same list as integers if valid RGB values. 
 def validateRGB(color) :
@@ -460,6 +460,7 @@ def validateRGB(color) :
     rgbValues = extractValues(color, 3)
 
     if not rgbValues : 
+        print('bo')
         return
 
     intValues = []
@@ -633,7 +634,7 @@ def printConversions(convertedValues) :
             output.append(colorCode)
     
     # deliver formatted output
-    if OUTPUT != 'stdout' :
+    if OUTPUT_DESTINATION != 'stdout' :
         
         ''' 
         TODO FOR EFFICIENCY:
@@ -644,7 +645,7 @@ def printConversions(convertedValues) :
         to actually open the file back in main() at the point when we evaluate args, and then close
         it after everything in main() has ran... food for thought.
         '''
-        with open(OUTPUT, 'a', encoding='utf-8') as file :
+        with open(OUTPUT_DESTINATION, 'a', encoding='utf-8') as file :
             for color in output :
                 file.write(color + '\n')
             file.write('\n')
