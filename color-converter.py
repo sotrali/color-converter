@@ -369,6 +369,7 @@ def HEXtoRGB(hexCode) :
         tempSum = 0
     
     return rgbValues
+    
 # Takes in a list of 3 floats, returns a list of 3 integers
 def CMYtoRGB(cmyValues) :
     red     = (1 - (cmyValues[0] / 100)) * 255

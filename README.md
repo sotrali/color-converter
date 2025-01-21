@@ -34,9 +34,9 @@ rgb(222, 244, 86)
 
 ---
 
-It can also function as a color translation utility for converting colors in bulk.
+It can also function as a color translation utility for converting in bulk.
 
-For example, you could take a file that has color codes in various formats and have them all converted to a single format.
+For example, you could input a file that has color codes in various formats and have them all converted to a single format.
 
 To do what was just described, use this command:
 
@@ -64,7 +64,7 @@ _Note: include the `-a` flag to append to the specified output file, rather than
 
 ---
 
-The program attempts to determine what color format you're inputting, and will succeed as long as the format is indicated at some point in the input string.
+The program always attempts to determine what color format you're inputting, and will succeed as long as the format is indicated at some point in the input string.
 
 For example, these are all valid strings to input 100, 200, and 300 as RGB values:
 
@@ -76,7 +76,7 @@ For example, these are all valid strings to input 100, 200, and 300 as RGB value
 
 _Note: Hexcodes will require a '#' in order to be automatically recognized._
 
-While the program will always try to auto-detect the input format, If you only have raw number values, you can specify a fallback format with flags.
+However, if you only have raw number values, you can specify a fallback format with flags.
 
 For example:
 
@@ -91,7 +91,7 @@ rgb(242, 240, 237)
 
 I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place.
 
-Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but I think CLI tools are cool, and I couldn't find any CLI color conversion utilities.
+Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but I think CLI tools are cool, and I couldn't find any CLI color conversion utilities. I decided I could make one, and the scope slowly expanded as I realized it would be fun to make a legitimate tool that could potentially serve others. The plan is to get this released as an installable package across distros and maybe even homebrew.
 
 # Conversion Sources
 
