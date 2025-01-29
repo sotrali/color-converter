@@ -75,7 +75,7 @@ For example, these are all valid strings to input 50, 100, and 200 as RGB values
 "excessive_stuff to! emphasize $ robsustness(rGb-50 .   )100^200"
 ```
 
-_Note: Hexcodes need to start with '#' in order to be detected_ 
+_Note: Hexcodes need to have a "#"  
 
 However, if you only have raw number values (or just want to manually override the auto detector), you can specify your input color format with flags.
 
