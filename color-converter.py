@@ -83,12 +83,8 @@ def main():
 
     ''' PROCESS COLORS '''
     for color in colorCodes :
-        # Try to automatically handle value 
-        if detectColorFormat(color, outputFormats) :
-            continue
-
-        # if we can't auto-detect the format, check args for guidance 
-        elif args.isHex :
+        # first check if input override has been provided 
+        if args.isHex :
             handleHex(color, outputFormats)
         elif args.isRgb :
             handleRGB(color, outputFormats)
@@ -100,8 +96,11 @@ def main():
             handleHSVorHSL(color, 'hsl', outputFormats)
         elif args.isHsv :
             handleHSVorHSL(color, 'hsv', outputFormats)
+        # otherwise, attempt to automatically handle value 
+        elif detectColorFormat(color, outputFormats) :
+            continue
         else :
-            print('ERROR: Could not detect inputted color format and no fallback flag was specified. see --help for more information on usage.')
+            print('ERROR: Could not detect inputted color format and no override format flag was provided. See --help for more information on usage.')
             return
     return
 
@@ -109,7 +108,7 @@ def main():
 '''
 # FORMAT HANDLERS
 '''
-
+# Handles a hex value's conversion and output
 # ARGS
 # color: string containing hex code
 # outputFormats: list indicating which conversions to perform
@@ -119,7 +118,7 @@ def handleHex(color, outputFormats) :
     if hexcode is None :
         return
 
-    # collect conversion results
+    # convert and collect results
     results = {}
     if VERBOSE :
         results['verbose-msg'] = 'CONVERTING HEX: ' + hexcode
@@ -136,6 +135,7 @@ def handleHex(color, outputFormats) :
     printConversions(results)
 
 
+# Handles an RGB value's conversion and output
 # ARGS
 # color: string containing RGB code
 # outputFormats: list indicating which conversions to perform 
@@ -145,7 +145,7 @@ def handleRGB(color, outputFormats) :
     if rgbValues is None :
         return
 
-    # collect conversion results
+    # convert and collect results
     results = {}
     if VERBOSE :
         results['verbose-msg'] = 'CONVERTING RGB: ' + str(rgbValues)
@@ -158,6 +158,7 @@ def handleRGB(color, outputFormats) :
     
     printConversions(results)
 
+# Handles a CMY value's conversion and output
 # ARGS
 # color: string containing CMY code
 # outputFormats: list indicating which conversions to perform 
@@ -167,7 +168,7 @@ def handleCMY(color, outputFormats) :
     if cmyValues is None :
         return
 
-    # collect conversion results
+    # convert and collect results
     results = {}
     if VERBOSE :
         results['verbose-msg'] = 'CONVERTING CMY: ' + str(cmyValues)
@@ -183,6 +184,7 @@ def handleCMY(color, outputFormats) :
 
     printConversions(results)
 
+# Handles a CMYK value's conversion and output
 # ARGS
 # color: string containing CMYK code
 # outputFormats: list indicating which conversions to perform 
@@ -192,7 +194,7 @@ def handleCMYK(color, outputFormats) :
     if cmykValues is None :
         return
 
-    # collect conversion results
+    # convert and collect results
     results = {}
     if VERBOSE :
         results['verbose-msg'] = 'CONVERTING CMYK: ' + str(cmykValues)
@@ -208,17 +210,18 @@ def handleCMYK(color, outputFormats) :
 
     printConversions(results)
 
+# Handles either an HSV or HSL value's conversion and output
 # ARGS
 # color: string containing CMY code
 # outputFormats: list indicating which conversions to perform 
 # handle: string ('hsl' or 'hsv'), indicating which format to handle 
 def handleHSVorHSL(color, handle, outputFormats) :
-    # collect conversion results
+    # sanitize/validate input
     validated = validateHSLorHSV(color)
     if validated is None :
         return
 
-    # collect conversion results
+    # convert and collect results
     results = {}
     if VERBOSE :
         if handle == 'hsl' :
@@ -529,16 +532,13 @@ def validateHSLorHSV(color) :
 # RETURNS
 # truth if success, false if failure to detect a format
 def detectColorFormat(color, outputFormats) :
-    if '#' in color :
-        handleHex(color, outputFormats)
-        return True
-    elif 'rgb' in color :
+   if 'rgb' in color.lower() :
         handleRGB(color, outputFormats)
         return True
-    elif 'cmyk' in color :
+    elif 'cmyk' in color.lower() :
         handleCMYK(color, outputFormats)
         return True
-    elif 'cmy' in color :
+    elif 'cmy' in color.lower() :
         handleCMY(color, outputFormats)
         return True
     elif color.strip().startswith('hsl') :
@@ -546,6 +546,9 @@ def detectColorFormat(color, outputFormats) :
         return True
     elif color.strip().startswith('hsv') :
         handleHSVorHSL(color, 'hsv', outputFormats)
+        return True
+    if '#' in color :
+        handleHex(color, outputFormats)
         return True
     else :
         return False
