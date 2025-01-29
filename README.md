@@ -5,12 +5,12 @@ A robust CLI color conversion utility written in Python.
 # Features
 
 - Supports conversions between hexcode, RGB, CMY, CMYK, HSL, and HSV
-- Lenient automatic input detection
+- Lenient automatic input detection (can be overriden)
 - Bulk conversions to and from files
 
 # Usage
 
-Simply supply one or more colors in any of the supported formats as a string, and it will perform all supported conversions.
+Simply supply one or more color codes in any of the supported formats as a string, and you will receive output of all supported format conversions.
 
 ```
 $ python color-converter.py "#85feab"
@@ -22,29 +22,28 @@ hsl(138.84, 98.37, 75.88)
 hsv(138.84, 47.64, 99.61)
 ```
 
-You can also use flags to limit the output:
+You can use one or more flags to specify the output formats:
 
 ```
-$ python color-converter.py -rgb "#abc123" "#def456"
+$ python color-converter.py -rgb -hsl "#abc123" "#def456"
 rgb(171, 193, 35)
+hsl(68.35, 69.30, 44.71)
 
 rgb(222, 244, 86)
-
+hsl(68.35, 87.78, 64.71)
 ```
 
 ---
 
-It can also function as a color translation utility for converting in bulk.
+You can also use this tool to convert codes in bulk.
 
-For example, you could input a file that has color codes in various formats and have them all converted to a single format.
-
-To do what was just described, use this command:
+For example, to input a file that has color codes in various formats and have them all converted to a single format:
 
 ```
 $ python color-converter -cmyk -i "input_file" -o "output_file"
 ```
 
-where the input file contains:
+Where the input file contains:
 
 ```
 rgb(1, 2, 3)
@@ -52,7 +51,7 @@ rgb(1, 2, 3)
 HSV(1, 2, 3)
 ```
 
-and the output file gets populated with:
+If the output file didn't already exist, it will be created. Otherwise, it will be overwritten with:
 
 ```
 cmyk(66.67%, 33.33%, 0%, 98.82%)
@@ -60,23 +59,23 @@ cmyk(79.07%, 39.53%, 0%, 66.27%)
 cmyk(0%, 1.97%, 2%, 97%)
 ```
 
-_Note: include the `-a` flag to append to the specified output file, rather than overwriting it._
+_Note: include the `-a` flag to append to an existing output file, rather than overwriting it._
 
 ---
 
-The program always attempts to determine what color format you're inputting, and will succeed as long as the format is indicated at some point in the input string.
+The program will try to determine what color format you're inputting, and will succeed as long as the format is indicated at some point in the input string.
 
-For example, these are all valid strings to input 100, 200, and 300 as RGB values:
+For example, these are all valid strings to input 50, 100, and 200 as RGB values:
 
 ```
-"rgb(100, 200, 300)"
-"  RGB: 100 200 300"
-"rGb-100 .   200^300"
+"rgb(50, 100, 200)"
+"  RGB: 50 100 200"
+"excessive_stuff to! emphasize $ robsustness(rGb-50 .   )100^200"
 ```
 
-_Note: Hexcodes will require a '#' in order to be automatically recognized._
+_Note: Hexcodes need to start with '#' in order to be detected_ 
 
-However, if you only have raw number values, you can specify a fallback format with flags.
+However, if you only have raw number values (or just want to manually override the auto detector), you can specify your input color format with flags.
 
 For example:
 
@@ -85,13 +84,13 @@ $ python color-converter.py -rgb -isCmyk "1 2 3 4"
 rgb(242, 240, 237)
 ```
 
-(Don't forget to use the `-h` or `--help` flags for in-terminal help)
+(Don't forget to use the `-h` or `--help` flags for additional in-terminal help)
 
 # Project Background
 
-I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place.
+I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place. What is a color space?
 
-Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but I think CLI tools are cool, and I couldn't find any CLI color conversion utilities. I decided I could make one, and the scope slowly expanded as I realized it would be fun to make a legitimate tool that could potentially serve others. The plan is to get this released as an installable package across distros and maybe even homebrew.
+Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but, I think CLI tools are cool. I searched around a bit on github and the AUR and couldn't find any CLI color conversion utilities. I decided I could make one for fun, and the scope slowly expanded. I realized this was my opportunityto make and distribute a tool that could potentially serve others!
 
 # Conversion Sources
 
@@ -109,7 +108,7 @@ RGB<->CMY:
 
 http://colormine.org/convert/rgb-to-cmy
 
-RGB<->HSL:
+RGB<->HSL/HSV:
 
 https://www.baeldung.com/cs/convert-color-hsl-rgb
 
