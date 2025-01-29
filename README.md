@@ -59,7 +59,6 @@ cmyk(66.67, 33.33, 0.00, 98.82)
 cmyk(79.07, 39.53, 0.00, 66.27)
 
 cmyk(0.00, 12.50, 12.50, 96.86)
-
 ```
 
 _Note: include the `-a` flag to append to an existing output file, rather than overwriting it._
