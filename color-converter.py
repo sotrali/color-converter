@@ -433,10 +433,10 @@ def HSLorHSVToRGB(values, convertFrom) :
         B = chroma + m
         return [smartRound(R * 255), smartRound(G * 255), smartRound(B * 255)]
     elif (hPrime >= 5) and (hPrime <= 6) :
-        R = chrome + m
+        R = chroma + m
         G = 0 + m
         B = x + m
-        return [int(R * 255), int(G * 255), int(B * 255)]
+        return [smartRound(R * 255), smartRound(G * 255), smartRound(B * 255)]
     else :
         print('RGB to HSV/HSL conversion failed')
         return
@@ -464,15 +464,14 @@ def validateRGB(color) :
     rgbValues = extractValues(color, 3)
 
     if not rgbValues : 
-        print('bo')
+        print('ERROR: Improper format for RGB (see --help)')
         return
 
     intValues = []
     for value in rgbValues :
-        # TODO see if i should smartround here instead of int cast
         value = smartRound(value)
         if (value < 0) or (value > 255) :
-            print('ERROR: Each RBG value must be between 0-255')
+            print(f'ERROR: Each RBG value must be between 0-255, was {value}')
             return 
         intValues.append(value)
     
@@ -480,18 +479,21 @@ def validateRGB(color) :
 
 # Takes in a list of 3 or 4 strings. Returns same list as integers if valid CMYK values.
 def validateCMYorCMYK(color, include_K) :
+    k = ''
     if include_K :
+        k = 'K'
         values = extractValues(color, 4)
     else :
         values = extractValues(color, 3)
     if not values :
+        print(f'ERROR: Improper format for CMY{k} (see --help)') 
         return
 
     floatValues = []
     for value in values :
         value = float(value)
         if (value < 0) or (value > 100) :
-            print('ERROR: Each CMY(K) value must be between 0,0-100.0')
+            print(f'ERROR: Each CMY{k} value must be between 0.0-100.0, was {value}')
             return
         floatValues.append(value)
     
@@ -501,6 +503,7 @@ def validateCMYorCMYK(color, include_K) :
 def validateHSLorHSV(color) :
     color = extractValues(color, 3)
     if color is None :
+        print(f'ERROR: Improper format for HSL/V (see --help)') 
         return
 
     for i in range(3) :
@@ -509,14 +512,14 @@ def validateHSLorHSV(color) :
         else :
             color[i] = float(color[i])
 
-    if (color[0] < 0) or (color[0] > 255) :
-        print('ERROR: Invalid hue value (should be 0-255)')
+    if (color[0] < 0) or (color[0] > 360) :
+        print(f'ERROR: Invalid H value (should be 0-360, was {color[0]})')
         return
     if (color[1] < 0) or (color[1] > 100) :
-        print('ERROR: Invalid saturation value (should be 0.0-100.0)')
+        print(f'ERROR: Invalid S value (should be 0.0-100.0, was {color[1]})')
         return
     if (color[2] < 0) or (color[2] > 100) :
-        print('ERROR: Invalid lightness/value value (should be 0.0-100.0)')
+        print(f'ERROR: Invalid V/L value (should be 0.0-100.0, was {color[2]})')
         return
 
     return [color[0], color[1], color[2]]
@@ -541,10 +544,10 @@ def detectColorFormat(color, outputFormats) :
     elif 'cmy' in color.lower() :
         handleCMY(color, outputFormats)
         return True
-    elif color.strip().startswith('hsl') :
+    elif 'hsl' in color.lower() :
         handleHSVorHSL(color, 'hsl', outputFormats)
         return True
-    elif color.strip().startswith('hsv') :
+    elif 'hsv' in color.lower() :
         handleHSVorHSL(color, 'hsv', outputFormats)
         return True
     elif '#' in color :
@@ -601,7 +604,7 @@ def extractValues(color, numValues, isHex = False) :
             extractedValues.append(tempValue)
 
     if len(extractedValues) != numValues :
-        print(f'Could not extract the correct number of values from input: {color}. numValues requested: {numValues}, isHex: {isHex}, Values successfully extracted: {len(extractedValues)}, {extractedValues}')
+        print(f'Could not extract the correct number of values from input: "{color}".\n- Number of values required: {numValues}\n- {len(extractedValues)} values successfully extracted: {extractedValues}')
         return False
 
     return extractedValues
@@ -643,7 +646,7 @@ def printConversions(convertedValues) :
         ''' 
         TODO FOR EFFICIENCY:
 
-        right now, unless i'm mistaken and there's some hidden optimization going on, this is 
+        right now, unless i'm mistaken and there's some hidden python optimization going on, this is 
         going to open and close the file to write the conversions of each inputted color code.
         if there's a huge file being used as input, this may get slow, so perhaps the best move is
         to actually open the file back in main() at the point when we evaluate args, and then close

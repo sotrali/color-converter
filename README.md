@@ -54,9 +54,12 @@ HSV(1, 2, 3)
 If the output file didn't already exist, it will be created. Otherwise, it will be overwritten with:
 
 ```
-cmyk(66.67%, 33.33%, 0%, 98.82%)
-cmyk(79.07%, 39.53%, 0%, 66.27%)
-cmyk(0%, 1.97%, 2%, 97%)
+cmyk(66.67, 33.33, 0.00, 98.82)
+
+cmyk(79.07, 39.53, 0.00, 66.27)
+
+cmyk(0.00, 12.50, 12.50, 96.86)
+
 ```
 
 _Note: include the `-a` flag to append to an existing output file, rather than overwriting it._
