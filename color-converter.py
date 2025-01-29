@@ -532,7 +532,7 @@ def validateHSLorHSV(color) :
 # RETURNS
 # truth if success, false if failure to detect a format
 def detectColorFormat(color, outputFormats) :
-   if 'rgb' in color.lower() :
+    if 'rgb' in color.lower() :
         handleRGB(color, outputFormats)
         return True
     elif 'cmyk' in color.lower() :
@@ -547,7 +547,7 @@ def detectColorFormat(color, outputFormats) :
     elif color.strip().startswith('hsv') :
         handleHSVorHSL(color, 'hsv', outputFormats)
         return True
-    if '#' in color :
+    elif '#' in color :
         handleHex(color, outputFormats)
         return True
     else :
