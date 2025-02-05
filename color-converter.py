@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import math
 import argparse
 
+VERSION = 1.0
 TYPES = ['hex', 'rgb', 'cmy', 'cmyk', 'hsl', 'hsv']
 # look into LAB
 
@@ -33,17 +35,23 @@ def main():
     parser.add_argument('--output',  '-o', help='the name of a file to store output in (will create file if doesn\'t exist, will OVERWRITE existing file\'s contents)')
     parser.add_argument('--append',  '-a', action='store_true', help='append rather than overwrite when outputting to file rather than stdout')
     parser.add_argument('--verbose', '-v', action='store_true', help='print when performing conversions')
+    parser.add_argument('--version', action='store_true', help='print current version')
     
     parser.add_argument('color', nargs='*', help='a color in Hex, RGB, CMY, CMYK, HSL or HSV format')
     args = parser.parse_args()
 
 
     ''' PROCESS ARGS '''
+    # simple version check
+    if args.version :
+        print('color-converter: CLI color code translator!')
+        print('              -- v.1.0 ---                 ')
+
     # determine which conversions to perform 
     outputFormats = []
     flagsActive = 0
     for flag in vars(args).keys() :
-        # if the flag for an output type is present, keep trac
+        # if an output format flag is present, keep track
         if (vars(args).get(flag, False)) and (flag in TYPES) :
             flagsActive += 1
             outputFormats.append(flag)   
