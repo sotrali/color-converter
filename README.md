@@ -8,6 +8,31 @@ A robust CLI color conversion utility written in Python.
 - Lenient automatic input detection (can be overriden)
 - Bulk conversions to and from files
 
+# Installation
+
+This program is available as a package on the AUR.
+
+## For manual installation on Unix operating systems (Linux+MacOS):
+- Ensure that you have `python3` installed
+- Clone/download and unzip this repo
+- Navigate to the unzipped folder in your terminal and run the following commands (technically, only the first command is necessary to use the program):
+```
+# install -m 755 -TD "color-converter.py" "/usr/bin/color-converter"
+# install -m 644 -TD "README.md" "/usr/share/doc/color-converter/README.md"
+# install -m 644 -TD "LICENSE" "usr/share/licenses/color-converter/LICENSE"
+```
+
+To uninstall, run these commands:
+```
+# rm -f "/usr/bin/color-converter"
+# rm -rf "/usr/share/doc/color-converter/"
+# rm -rf "/usr/share/licenses/color-converter/"
+```
+
+## For manual installation on Windows
+To be frank, I don't have a Windows manchine so I'm not exactly sure how you would get this set up as an "installed" command line program. If you don't want to run it as a Python program each time, maybe you could create a batch script to run the program, and put said script somewhere in your PATH. 
+
+
 # Usage
 
 Simply supply one or more color codes in any of the supported formats as a string, and you will receive output of all supported format conversions.
