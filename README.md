@@ -10,7 +10,10 @@ A robust CLI color conversion utility written in Python.
 
 # Installation
 
-This program is available as a package on the AUR.
+You don't need to install this to use it, it's just a Python file. 
+If you want to install it, here's how:
+
+NOTE: This program is available on the AUR.
 
 ### For manual installation on Unix operating systems (Linux+MacOS):
 - Ensure that you have `python3` installed
