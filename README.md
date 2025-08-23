@@ -5,7 +5,7 @@ A robust CLI color conversion utility written in Python.
 # Features
 
 - Supports conversions between hexcode, RGB, CMY, CMYK, HSL, and HSV
-- Lenient automatic input detection (can be overriden)
+- Lenient, overridable, automatic input detection
 - Bulk conversions to and from files
 
 # Installation
