@@ -120,7 +120,7 @@ rgb(242, 240, 237)
 
 I started this project because I found myself converting between Hex and RGB a lot while ricing. As I was frequently visiting various color picker websites, I began thinking more and more about how color conversions even work in the first place. What is a color space?
 
-Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but, I think CLI tools are cool. I searched around a bit on github and the AUR and couldn't find any CLI color conversion utilities. I decided I could make one for fun, and the scope slowly expanded. I realized this was my opportunityto make and distribute a tool that could potentially serve others!
+Using any random color-picker online to go from RBG->Hex (and vice versa) works plenty fine, but, I think CLI tools are cool. I searched around a bit on github and the AUR and couldn't find any basic CLI color conversion utilities. I decided I could make one for fun, and the scope slowly expanded. I realized this was my opportunity to make and distribute a tool that could potentially serve others!
 
 # Conversion Sources
 
